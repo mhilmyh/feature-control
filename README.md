@@ -1,2 +1,2 @@
-# featureflag-php
-Feature Flag Manager for PHP
+# Feature Control
+Feature Control is a class helper that can manage and register features in application.
