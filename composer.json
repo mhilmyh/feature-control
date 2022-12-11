@@ -1,0 +1,18 @@
+{
+    "name": "hilmy/feature-control",
+    "description": "Helper class for controlling features",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Hilmy\\FeatureControl\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "mhilmyh",
+            "email": "mhilmy021@gmail.com"
+        }
+    ],
+    "require": {}
+}
