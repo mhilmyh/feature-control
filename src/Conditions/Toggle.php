@@ -25,4 +25,14 @@ class Toggle
     {
         $this->switch = !$this->switch;
     }
+
+    public function toString(): string
+    {
+        return $this->switch ? '1' : '0';
+    }
+
+    public function fromString(string $value): void
+    {
+        $this->switch = $value == '1';
+    }
 }

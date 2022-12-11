@@ -23,4 +23,14 @@ class Whitelist
         }
         return array_search($item, $this->listed);
     }
+
+    public function toString(): string
+    {
+        return implode(':', $this->listed);
+    }
+
+    public function fromString(string $value): void
+    {
+        $this->listed = explode(':', $value);
+    }
 }

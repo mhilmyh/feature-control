@@ -1,8 +1,8 @@
 <?php
 
-namespace Hilmy\FeatureControl;
+namespace Hilmy\FeatureControl\Storages;
 
-use Hilmy\FeatureControl\Storages\File;
+use Hilmy\FeatureControl\Conditions\Condition;
 
 class Storage
 {
@@ -16,7 +16,7 @@ class Storage
     public function save(string $name, Condition $condition): bool
     {
 
-        return $this->file->set($name);
+        return $this->file->set($name, $condition->toString());
     }
 
     public function load(string $name): string
@@ -26,6 +26,6 @@ class Storage
 
     public function delete(string $name): bool
     {
-        return $this->file->remove($name);
+        return $this->file->del($name);
     }
 }

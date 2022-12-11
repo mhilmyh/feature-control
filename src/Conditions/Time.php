@@ -24,8 +24,15 @@ class Time
         return $this->start <= $now && $now < $this->end;
     }
 
-    public function toString()
+    public function toString(): string
     {
-        return strval($this->start) . '-' . strval($this->end);
+        return strval($this->start) . '~' . strval($this->end);
+    }
+
+    public function fromString(string $value): void
+    {
+        $time = explode('~', $value);
+        $this->start = intval(@$time[0] ?? 0);
+        $this->end = intval(@$time[1] ?? 0);
     }
 }

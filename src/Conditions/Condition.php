@@ -1,11 +1,6 @@
 <?php
 
-namespace Hilmy\FeatureControl;
-
-use Hilmy\FeatureControl\Conditions\Toggle;
-use Hilmy\FeatureControl\Conditions\Percentage;
-use Hilmy\FeatureControl\Conditions\Time;
-use Hilmy\FeatureControl\Conditions\Whitelist;
+namespace Hilmy\FeatureControl\Conditions;
 
 class Condition
 {
@@ -24,16 +19,32 @@ class Condition
         $this->whitelist = new Whitelist($whitelist);
     }
 
-    public function toString()
+    public function toString(): string
     {
+        $enable = $this->enable ? '1' : '0';
+        return $enable . ','
+            . $this->toggle->toString() . ','
+            . $this->percentage->toString() . ','
+            . $this->time->toString() . ','
+            . $this->whitelist->toString();
     }
 
-    public function enable(bool $enable = false): void
+    public function fromString(string $value): void
+    {
+        $exploded = explode(',', $value);
+        $this->enable = @$exploded[0] == '1';
+        $this->toggle->fromString(@$exploded[1] ?? '');
+        $this->percentage->fromString(@$exploded[2] ?? '');
+        $this->time->fromString(@$exploded[3] ?? '');
+        $this->whitelist->fromString(@$exploded[4] ?? '');
+    }
+
+    public function enable(bool $enable = true): void
     {
         $this->enable = $enable;
     }
 
-    public function toggle(bool $toggle = false): void
+    public function toggle(bool $toggle = true): void
     {
         $this->toggle->set($toggle);
     }

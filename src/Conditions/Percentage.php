@@ -26,8 +26,13 @@ class Percentage
         return $remainder <= $this->percent;
     }
 
-    public function toString()
+    public function toString(): string
     {
         return strval($this->percent);
+    }
+
+    public function fromString(string $value): void
+    {
+        $this->percent = intval($value);
     }
 }

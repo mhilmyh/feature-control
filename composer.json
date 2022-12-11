@@ -14,5 +14,7 @@
             "email": "mhilmy021@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "illuminate/support": "^9.43"
+    }
 }

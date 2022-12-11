@@ -29,7 +29,7 @@ class File
         return file_get_contents($this->relativePath($filename)) ?? '';
     }
 
-    public function remove(string $filename = ''): bool
+    public function del(string $filename = ''): bool
     {
         if ($filename == '') {
             return false;
