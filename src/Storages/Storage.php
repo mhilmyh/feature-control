@@ -24,6 +24,14 @@ class Storage
         return $this->file->get($name);
     }
 
+    public function read(string $name): Condition
+    {
+        $content = $this->load($name);
+        $condition = new Condition();
+        $condition->fromString($content);
+        return $condition;
+    }
+
     public function delete(string $name): bool
     {
         return $this->file->del($name);

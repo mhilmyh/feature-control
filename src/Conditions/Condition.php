@@ -10,7 +10,7 @@ class Condition
     private Time $time;
     private Whitelist $whitelist;
 
-    public function __construct(bool $toggle, int $percentage, int $start, int $end, array $whitelist)
+    public function __construct(bool $toggle = false, int $percentage = 0, int $start = 0, int $end = 0, array $whitelist = [])
     {
         $this->enable = true;
         $this->toggle = new Toggle($toggle);
