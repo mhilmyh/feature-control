@@ -11,29 +11,29 @@ class File
         $this->basePath = $basePath;
     }
 
-    public function relativePath(string $filename): string
+    public function relativePath(string $dirname): string
     {
-        return $this->basePath . '/' . $filename;
+        return $this->basePath . '/' . $dirname;
     }
 
-    public function set(string $filename = '', string $content = ''): bool
+    public function set(string $dirname = '', string $content = ''): bool
     {
-        if ($filename == '') {
+        if ($dirname == '') {
             return false;
         }
-        return file_put_contents($this->relativePath($filename), $content) != false;
+        return file_put_contents($this->relativePath($dirname), $content) != false;
     }
 
-    public function get(string $filename): string
+    public function get(string $dirname): string
     {
-        return file_get_contents($this->relativePath($filename)) ?? '';
+        return file_get_contents($this->relativePath($dirname)) ?? '';
     }
 
-    public function del(string $filename = ''): bool
+    public function del(string $dirname = ''): bool
     {
-        if ($filename == '') {
+        if ($dirname == '') {
             return false;
         }
-        return unlink($this->relativePath($filename));
+        return unlink($this->relativePath($dirname));
     }
 }
