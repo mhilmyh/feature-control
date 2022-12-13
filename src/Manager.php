@@ -16,6 +16,16 @@ class Manager
         $this->storage = new Storage($basePath);
     }
 
+    public function storage(): Storage
+    {
+        return $this->storage;
+    }
+
+    public function registered(): array
+    {
+        return $this->registered;
+    }
+
     public function set(
         string $name,
         bool $toggle = false,
@@ -24,7 +34,10 @@ class Manager
         int $end = 0,
         array $whitelist = [],
     ): bool {
-        $condition = new Condition();
+        if ($name == '') {
+            return false;
+        }
+        $condition = new Condition($toggle, $percentage, $start, $end, $whitelist);
         return $this->register($name, $condition);
     }
 
@@ -63,6 +76,7 @@ class Manager
         if ($name == '') {
             return false;
         }
+        $this->remove($name);
         return $this->storage->delete($name);
     }
 }
