@@ -16,6 +16,18 @@ class Manager
         $this->storage = new Storage($basePath);
     }
 
+    public function set(
+        string $name,
+        bool $toggle = false,
+        int $percentage = 0,
+        int $start = 0,
+        int $end = 0,
+        array $whitelist = [],
+    ): bool {
+        $condition = new Condition();
+        return $this->register($name, $condition);
+    }
+
     public function register(string $name, Condition $condition): bool
     {
         if ($name == '') {
