@@ -71,6 +71,25 @@ class Manager
         return $this->storage->save($name, $condition);
     }
 
+    public function backup()
+    {
+        foreach ($this->registered as $name => $condition) {
+            $this->storage->save($name, $condition);
+        }
+    }
+
+    public function load()
+    {
+    }
+
+    public function read(string $name): Condition
+    {
+        if ($name == '') {
+            return new Condition();
+        }
+        return $this->storage->read($name);
+    }
+
     public function delete(string $name): bool
     {
         if ($name == '') {
