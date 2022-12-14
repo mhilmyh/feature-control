@@ -69,6 +69,23 @@ class Condition
         $this->whitelist->set($whitelist);
     }
 
+    public function check(mixed $id = null, int $now = 0): bool
+    {
+        if (!$this->isEnabled()) {
+            return false;
+        }
+        if ($this->isToggleOn()) {
+            return true;
+        }
+        if ($this->isInPercentage(intval($id))) {
+            return true;
+        }
+        if ($this->isInTimeRange($now)) {
+            return true;
+        }
+        return $this->isWhitelisted($id);
+    }
+
     public function isEnabled(): bool
     {
         return $this->enable;

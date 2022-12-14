@@ -29,6 +29,18 @@ class Manager
         return $this->storage;
     }
 
+    public function check(string $name, mixed $id): bool
+    {
+        if ($name == '') {
+            return false;
+        }
+        $condition = $this->get($name);
+        if (is_null($condition) || is_array($condition)) {
+            return false;
+        }
+        return $condition->check($id, time());
+    }
+
     public function set(
         string $name,
         Condition|array|null $condition = null,
@@ -67,7 +79,7 @@ class Manager
         return true;
     }
 
-    public function backup()
+    public function backup(): void
     {
         foreach ($this->cached as $name => $value) {
             if (!$value instanceof Condition || $name == '') {
@@ -77,17 +89,17 @@ class Manager
         }
     }
 
-    public function read(string $name = '', bool $stored = true): Condition|array|null
+    public function get(string $name = '', bool $stored = true): Condition|array|null
     {
         if ($name == '') {
             if ($stored) {
-                $this->cached = $this->storage->read();
+                $this->cached = $this->storage->get();
             }
             return $this->cached;
         }
         $condition = @$this->cached[$name];
         if ($stored && $condition == null) {
-            $condition = $this->storage->read($name);
+            $condition = $this->storage->get($name);
         }
         return $condition;
     }

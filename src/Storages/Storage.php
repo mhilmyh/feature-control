@@ -23,7 +23,7 @@ class Storage
         return $this->file->get($name);
     }
 
-    public function read(string $name = ''): array|null|Condition
+    public function get(string $name = ''): array|null|Condition
     {
         $content = $this->load($name);
         if (is_array($content)) {
