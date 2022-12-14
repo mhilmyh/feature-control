@@ -19,14 +19,18 @@ class Storage
         return $this->file->set($name, $condition->toString());
     }
 
-    public function load(string $name): string
+    public function load(string $name = ''): string|array
     {
         return $this->file->get($name);
     }
 
-    public function read(string $name): Condition
+    public function read(string $name = ''): array|Condition
     {
         $content = $this->load($name);
+        if (is_array($content)) {
+            foreach ($content as $item) {
+            }
+        }
         $condition = new Condition();
         $condition->fromString($content);
         return $condition;

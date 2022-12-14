@@ -7,13 +7,21 @@ use Hilmy\FeatureControl\Storages\Storage;
 
 class Manager
 {
-    private array $registered;
+    private array $cached;
     private Storage $storage;
 
     public function __construct(string $basePath = '')
     {
-        $this->registered = [];
+        $this->cached = [];
         $this->storage = new Storage($basePath);
+    }
+
+    public function cache(string $name = ''): Condition|array|null
+    {
+        if ($name != '') {
+            return $this->cached[$name];
+        }
+        return $this->cached;
     }
 
     public function storage(): Storage
@@ -21,81 +29,79 @@ class Manager
         return $this->storage;
     }
 
-    public function registered(): array
-    {
-        return $this->registered;
-    }
-
     public function set(
         string $name,
+        Condition|array|null $condition = null,
         bool $toggle = false,
         int $percentage = 0,
         int $start = 0,
         int $end = 0,
         array $whitelist = [],
+        bool $store = false,
     ): bool {
         if ($name == '') {
             return false;
         }
-        $condition = new Condition($toggle, $percentage, $start, $end, $whitelist);
-        return $this->register($name, $condition);
-    }
-
-    public function register(string $name, Condition $condition): bool
-    {
-        if ($name == '') {
-            return false;
+        $value = null;
+        if (is_array($condition)) {
+            $value = new Condition(
+                @$condition['toggle'] ?? $toggle,
+                @$condition['percentage'] ?? $percentage,
+                @$condition['start'] ?? $start,
+                @$condition['end'] ?? $end,
+                @$condition['whitelist'] ?? $whitelist,
+            );
+        } else if (is_null($condition)) {
+            $value = new Condition(
+                $toggle,
+                $percentage,
+                $start,
+                $end,
+                $whitelist
+            );
         }
-        $this->registered[$name] = $condition;
+        $this->cache[$name] = $value;
+        if ($store) {
+            $this->storage->save($name, $condition);
+        }
         return true;
-    }
-
-    public function remove(string $name): bool
-    {
-        if ($name == '') {
-            return false;
-        }
-        unset($this->registered[$name]);
-        return true;
-    }
-
-    public function save(string $name): bool
-    {
-        if ($name == '') {
-            return false;
-        }
-        $condition = @$this->registered[$name];
-        if (empty($condition)) {
-            return false;
-        }
-        return $this->storage->save($name, $condition);
     }
 
     public function backup()
     {
-        foreach ($this->registered as $name => $condition) {
-            $this->storage->save($name, $condition);
+        foreach ($this->cached as $name => $value) {
+            if (!$value instanceof Condition || $name == '') {
+                continue;
+            }
+            $this->storage->save($name, $value);
         }
     }
 
-    public function load()
-    {
-    }
-
-    public function read(string $name): Condition
-    {
-        if ($name == '') {
-            return new Condition();
-        }
-        return $this->storage->read($name);
-    }
-
-    public function delete(string $name): bool
+    public function read(string $name = '', bool $stored = true): Condition|array|null
     {
         if ($name == '') {
-            return false;
+            if ($stored) {
+                $this->cached = $this->storage->read();
+            }
+            return $this->cached;
         }
-        $this->remove($name);
+        $condition = @$this->cached[$name];
+        if ($stored && $condition == null) {
+            $condition = $this->storage->read($name);
+        }
+        return $condition;
+    }
+
+    public function delete(string $name = '', bool $stored = true): bool
+    {
+        if ($name == '') {
+            $this->cached = [];
+        } else {
+            unset($this->cached[$name]);
+        }
+        if (!$stored) {
+            return true;
+        }
         return $this->storage->delete($name);
     }
 }

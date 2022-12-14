@@ -13,26 +13,47 @@ class File
         $this->basePath = $basePath;
     }
 
-    public function dirPath(string $dirname): string
+    private function dirPath(string $dirname): string
     {
         return $this->basePath . '/' . $dirname;
     }
 
-    public function fullPath(string $dirname): string
+    private function fullPath(string $dirname): string
     {
         return $this->dirPath($dirname)  . '/' . $this->filename;
     }
 
-    public function ensureDir(string $dirname): bool
+    private function ensureDir(string $dirname): bool
     {
         if ($dirname == '') {
             return false;
         }
-        $dirPath = $this->dirPath($dirname);
-        if (is_dir($dirPath)) {
+        if (is_dir($dirname)) {
             return true;
         }
-        return mkdir($dirPath, $this->permission, true);
+        return mkdir($dirname, $this->permission, true);
+    }
+
+    private function recursiveDir(string $dirname): array
+    {
+        $result = [];
+        $items = scandir($dirname, SCANDIR_SORT_DESCENDING);
+        array_pop($items);
+        array_pop($items);
+        foreach ($items as $item) {
+            if (!is_dir($item)) {
+                continue;
+            }
+            $recursived = $this->recursiveDir($item);
+            if (!count($recursived)) {
+                $result[] = $item;
+                continue;
+            }
+            foreach ($recursived as $recursive) {
+                $result[] = $item . '/' . $recursive;
+            }
+        }
+        return $result;
     }
 
     public function set(string $dirname = '', string $content = ''): bool
@@ -40,21 +61,24 @@ class File
         if ($dirname == '') {
             return false;
         }
-        $this->ensureDir($dirname);
+        $this->ensureDir($this->dirPath($dirname));
         return file_put_contents($this->fullPath($dirname), $content) != false;
     }
 
-    public function get(string $dirname): string
+    public function get(string $dirname = ''): string|array
     {
-        $this->ensureDir($dirname);
+        $this->ensureDir($this->dirPath($dirname));
+        if ($dirname == '') {
+            return $this->recursiveDir($this->basePath);
+        }
         return file_get_contents($this->fullPath($dirname)) ?? '';
     }
 
     public function del(string $dirname = ''): bool
     {
         if ($dirname == '') {
-            return false;
+            return unlink($this->basePath);
         }
-        return unlink($this->fullPath($dirname));
+        return unlink($this->dirPath($dirname));
     }
 }
