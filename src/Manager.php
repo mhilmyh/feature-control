@@ -60,7 +60,7 @@ class Manager
                 $whitelist
             );
         }
-        $this->cache[$name] = $value;
+        $this->cached[$name] = $value;
         if ($store) {
             $this->storage->save($name, $value);
         }

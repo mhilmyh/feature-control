@@ -23,7 +23,7 @@ class Storage
         return $this->file->get($name);
     }
 
-    public function read(string $name = ''): array|Condition
+    public function read(string $name = ''): array|null|Condition
     {
         $content = $this->load($name);
         if (is_array($content)) {
@@ -35,6 +35,9 @@ class Storage
                 $result[$dirname] = $condition;
             }
             return $result;
+        }
+        if (empty($content)) {
+            return null;
         }
         $condition = new Condition();
         $condition->fromString($content);

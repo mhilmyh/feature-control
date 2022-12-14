@@ -41,10 +41,11 @@ class File
         array_pop($items);
         array_pop($items);
         foreach ($items as $item) {
-            if (!is_dir($item)) {
+            $path = $dirname . '/' . $item;
+            if (!is_dir($path)) {
                 continue;
             }
-            $recursived = $this->recursiveDir($item);
+            $recursived = $this->recursiveDir($path);
             if (!count($recursived)) {
                 $result[] = $item;
                 continue;
