@@ -15,7 +15,6 @@ class Storage
 
     public function save(string $name, Condition $condition): bool
     {
-
         return $this->file->set($name, $condition->toString());
     }
 
@@ -28,8 +27,14 @@ class Storage
     {
         $content = $this->load($name);
         if (is_array($content)) {
-            foreach ($content as $item) {
+            $result = [];
+            foreach ($content as $dirname) {
+                $item = $this->load($dirname);
+                $condition = new Condition();
+                $condition->fromString($item);
+                $result[$dirname] = $condition;
             }
+            return $result;
         }
         $condition = new Condition();
         $condition->fromString($content);

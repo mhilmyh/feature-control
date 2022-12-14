@@ -62,7 +62,7 @@ class Manager
         }
         $this->cache[$name] = $value;
         if ($store) {
-            $this->storage->save($name, $condition);
+            $this->storage->save($name, $value);
         }
         return true;
     }
