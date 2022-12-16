@@ -18,10 +18,7 @@ class Manager
 
     public function cache(string $name = ''): Condition|array|null
     {
-        if ($name != '') {
-            return $this->cached[$name];
-        }
-        return $this->cached;
+        return $name != '' ? @$this->cached[$name] : $this->cached;
     }
 
     public function storage(): Storage
@@ -31,7 +28,7 @@ class Manager
 
     public function check(string $name, mixed $id): bool
     {
-        if ($name == '') {
+        if ($name == '' || empty($id)) {
             return false;
         }
         $condition = $this->get($name);
@@ -72,10 +69,10 @@ class Manager
                 $whitelist
             );
         }
-        $this->cached[$name] = $value;
         if ($store) {
-            $this->storage->save($name, $value);
+            $this->storage->set($name, $value);
         }
+        $this->cached[$name] = $value;
         return true;
     }
 
@@ -85,35 +82,38 @@ class Manager
             if (!$value instanceof Condition || $name == '') {
                 continue;
             }
-            $this->storage->save($name, $value);
+            $this->storage->set($name, $value);
         }
     }
 
-    public function get(string $name = '', bool $stored = true): Condition|array|null
+    public function load(): array
     {
-        if ($name == '') {
-            if ($stored) {
-                $this->cached = $this->storage->get();
-            }
-            return $this->cached;
-        }
-        $condition = @$this->cached[$name];
-        if ($stored && $condition == null) {
-            $condition = $this->storage->get($name);
-        }
-        return $condition;
+        $this->cached = $this->storage->all($this->storage->base());
+        return $this->cached;
     }
 
-    public function delete(string $name = '', bool $stored = true): bool
+    public function get(string $name = '', bool $stored = false): Condition|null
     {
         if ($name == '') {
-            $this->cached = [];
-        } else {
-            unset($this->cached[$name]);
+            return null;
         }
         if (!$stored) {
-            return true;
+            return @$this->cached[$name];
         }
-        return $this->storage->delete($name);
+        $value = $this->storage->get($name);
+        $this->cached[$name] = $value;
+        return $value;
+    }
+
+    public function delete(string $name = '', bool $stored = false): bool
+    {
+        if ($name == '') {
+            return false;
+        }
+        unset($this->cached[$name]);
+        if ($stored) {
+            return $this->storage->delete($name);
+        }
+        return true;
     }
 }

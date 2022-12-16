@@ -8,35 +8,52 @@ class Storage
 {
     private File $file;
 
-    public function __construct(string $basePath = '')
+    public function __construct(string $base = '')
     {
-        $this->file = new File($basePath);
+        $this->file = new File($base);
     }
 
-    public function save(string $name, Condition $condition): bool
+    public function base(): string
     {
+        return $this->file->path();
+    }
+
+    public function set(string $name, Condition $condition): bool
+    {
+        if ($name == '') {
+            return false;
+        }
         return $this->file->set($name, $condition->toString());
     }
 
-    public function load(string $name = ''): string|array
+    public function all(string $dir): array
     {
-        return $this->file->get($name);
+        $result = [];
+        $files = $this->file->scandir($dir);
+        foreach ($files as $fname) {
+            $path = $dir . '/' . $fname;
+            if ($this->file->filename($fname) && is_file($path)) {
+                $result[$dir] = $this->get($dir);
+            }
+            if (!is_dir($path)) {
+                continue;
+            }
+            $child = $this->all($path);
+            foreach ($child as $key => $condition) {
+                $result[$key] = $condition;
+            }
+        }
+        return $result;
     }
 
-    public function get(string $name = ''): array|null|Condition
+
+    public function get(string $name = ''): Condition|null
     {
-        $content = $this->load($name);
-        if (is_array($content)) {
-            $result = [];
-            foreach ($content as $dirname) {
-                $item = $this->load($dirname);
-                $condition = new Condition();
-                $condition->fromString($item);
-                $result[$dirname] = $condition;
-            }
-            return $result;
+        if ($name == '') {
+            return null;
         }
-        if (empty($content)) {
+        $content = $this->file->get($name);
+        if ($content == '') {
             return null;
         }
         $condition = new Condition();
@@ -46,6 +63,9 @@ class Storage
 
     public function delete(string $name): bool
     {
+        if ($name == '') {
+            return false;
+        }
         return $this->file->del($name);
     }
 }

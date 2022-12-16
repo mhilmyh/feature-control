@@ -4,82 +4,82 @@ namespace Hilmy\FeatureControl\Storages;
 
 class File
 {
-    private string $basePath = '';
-    private string $filename = 'feat.txt';
     private int $permission = 0764;
+    private string $base = '';
+    private string $fname = '';
 
-    public function __construct(string $basePath = '')
+    public function __construct(string $base = '', string $fname = 'feat.txt')
     {
-        $this->basePath = $basePath;
+        $this->base = $base;
+        $this->fname = $fname;
     }
 
-    private function dirPath(string $dirname): string
+    public function path(): string
     {
-        return $this->basePath . '/' . $dirname;
+        return $this->base;
     }
 
-    private function fullPath(string $dirname): string
+    public function filename(string $fname = ''): string|bool
     {
-        return $this->dirPath($dirname)  . '/' . $this->filename;
+        if ($fname == '') {
+            return $this->fname;
+        }
+        return $this->fname == $fname;
     }
 
-    private function ensureDir(string $dirname): bool
+    public function scandir(string $dir): array
     {
-        if ($dirname == '') {
+        $files = scandir($dir, SCANDIR_SORT_DESCENDING);
+        array_pop($files);
+        array_pop($files);
+        return $files;
+    }
+
+    public function set(string $dir = '', string $content = ''): bool
+    {
+        if ($dir == '') {
             return false;
         }
-        if (is_dir($dirname)) {
-            return true;
-        }
-        return mkdir($dirname, $this->permission, true);
-    }
-
-    private function recursiveDir(string $dirname): array
-    {
-        $result = [];
-        $items = scandir($dirname, SCANDIR_SORT_DESCENDING);
-        array_pop($items);
-        array_pop($items);
-        foreach ($items as $item) {
-            $path = $dirname . '/' . $item;
-            if (!is_dir($path)) {
-                continue;
-            }
-            $recursived = $this->recursiveDir($path);
-            if (!count($recursived)) {
-                $result[] = $item;
-                continue;
-            }
-            foreach ($recursived as $recursive) {
-                $result[] = $item . '/' . $recursive;
-            }
-        }
-        return $result;
-    }
-
-    public function set(string $dirname = '', string $content = ''): bool
-    {
-        if ($dirname == '') {
+        $parent = implode('/', [$this->base, $dir]);
+        if (!is_dir($parent) && !mkdir($parent, $this->permission, true)) {
             return false;
         }
-        $this->ensureDir($this->dirPath($dirname));
-        return file_put_contents($this->fullPath($dirname), $content) != false;
+        return file_put_contents(implode('/', [$parent, $this->fname]), $content) != false;
     }
 
-    public function get(string $dirname = ''): string|array
+    public function get(string $dir = ''): string
     {
-        $this->ensureDir($this->dirPath($dirname));
-        if ($dirname == '') {
-            return $this->recursiveDir($this->basePath);
+        if ($dir == '') {
+            return '';
         }
-        return file_get_contents($this->fullPath($dirname)) ?? '';
+        return file_get_contents(implode('/', [$this->base, $dir, $this->fname])) ?? '';
     }
 
-    public function del(string $dirname = ''): bool
+    public function del(string $dir = ''): bool
     {
-        if ($dirname == '') {
-            return unlink($this->basePath);
+        if ($dir == '') {
+            return false;
         }
-        return unlink($this->dirPath($dirname));
+        $path = implode('/', [$this->base, $dir, $this->fname]);
+        if (is_file($path) && !unlink($path)) {
+            return false;
+        }
+        for ($i = strlen($path) - 1; $i > 0; $i--) {
+            if ($path[$i] != '/') {
+                continue;
+            }
+            $sub = substr($path, 0, $i);
+            if (!is_dir($sub)) {
+                break;
+            }
+            $files = scandir($sub);
+            if (count($files) > 2) {
+                break;
+            }
+            if (!rmdir($sub)) {
+                break;
+            }
+        }
+        return true;
     }
 }
