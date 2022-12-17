@@ -14,9 +14,23 @@ class File
         $this->fname = $fname;
     }
 
-    public function path(): string
+    public function fullpath(string $dirpath = '', $base = true, $dir = true, $fname = true): string
     {
-        return $this->base;
+        if (strlen($dirpath) >= strlen($this->base) && strpos($dirpath, $this->base) != false) {
+            return $dirpath;
+        }
+        $array = [];
+        if ($base) {
+            $array[] = $this->base;
+        }
+        if ($dir) {
+            $array[] = $dirpath;
+        }
+        if ($fname) {
+            $array[] = $this->fname;
+        }
+        $path = implode('/', $array);
+        return $path;
     }
 
     public function filename(string $fname = ''): string|bool
@@ -40,7 +54,7 @@ class File
         if ($dir == '') {
             return false;
         }
-        $parent = implode('/', [$this->base, $dir]);
+        $parent = $this->fullpath($dir, fname: false);
         if (!is_dir($parent) && !mkdir($parent, $this->permission, true)) {
             return false;
         }
@@ -52,7 +66,7 @@ class File
         if ($dir == '') {
             return '';
         }
-        return file_get_contents(implode('/', [$this->base, $dir, $this->fname])) ?? '';
+        return file_get_contents($this->fullpath($dir)) ?? '';
     }
 
     public function del(string $dir = ''): bool
@@ -60,7 +74,7 @@ class File
         if ($dir == '') {
             return false;
         }
-        $path = implode('/', [$this->base, $dir, $this->fname]);
+        $path = $this->fullpath($dir);
         if (is_file($path) && !unlink($path)) {
             return false;
         }
