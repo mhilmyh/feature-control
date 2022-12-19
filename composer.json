@@ -3,10 +3,19 @@
     "description": "Helper class for controlling features",
     "type": "library",
     "license": "MIT",
+    "keywords": [
+        "feature",
+        "flag",
+        "percentage",
+        "whitelist"
+    ],
     "autoload": {
         "psr-4": {
             "Hilmy\\FeatureControl\\": "src/"
-        }
+        },
+        "files": [
+            "src/helpers.php"
+        ]
     },
     "authors": [
         {
@@ -14,7 +23,19 @@
             "email": "mhilmy021@gmail.com"
         }
     ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Hilmy\\ServiceProviders\\FeatureControl"
+            ],
+            "aliases": {
+                "Feature": "Hilmy\\FeatureControl\\Facades\\Feature"
+            }
+        }
+    },
     "require": {
-        "illuminate/support": "^9.43"
+        "laravel/framework": "^9.44"
     }
 }
